@@ -34,6 +34,8 @@ public abstract class AbstractRESTEasyService implements Lifecycle {
 
    private ResteasyClient httpClient = null;
 
+   HttpClient http2 = HttpClient.newHttpClient();
+
    @Property(doc = "The username to use on an authenticated server. Defaults to null.")
    private String username;
 
@@ -73,27 +75,24 @@ public abstract class AbstractRESTEasyService implements Lifecycle {
          return;
       }
 
-
-      HttpClient httpClient = HttpClient.newHttpClient();
-
-//      httpClient = new ResteasyClientBuilder().httpEngine(new URLConnectionEngine())
-//         .establishConnectionTimeout(connectionTimeout, TimeUnit.MILLISECONDS)
-//         .socketTimeout(socketTimeout, TimeUnit.MILLISECONDS).connectionPoolSize(maxConnections)
-//         .maxPooledPerRoute(maxConnectionsPerHost).hostnameVerification(ResteasyClientBuilder.HostnameVerificationPolicy.ANY)
-//         .register(new ClientRequestFilter() {
-//            @Override
-//            public void filter(ClientRequestContext clientRequestContext) throws IOException {
-//               // Remove default RESTeasy http request headers
-//               MultivaluedMap<String, Object> clientRequestHeaders = clientRequestContext.getHeaders();
-//               clientRequestHeaders.put("Accept-Encoding", Collections.emptyList());
-//               // Add custom headers
-//               if (httpHeaders != null) {
-//                  httpHeaders.forEach(keyValue ->
-//                     clientRequestHeaders.put(keyValue.getKey(), Arrays.asList(keyValue.getValue()))
-//                  );
-//               }
-//            }
-//         }).build();
+      httpClient = new ResteasyClientBuilder().httpEngine(new URLConnectionEngine())
+         .establishConnectionTimeout(connectionTimeout, TimeUnit.MILLISECONDS)
+         .socketTimeout(socketTimeout, TimeUnit.MILLISECONDS).connectionPoolSize(maxConnections)
+         .maxPooledPerRoute(maxConnectionsPerHost).hostnameVerification(ResteasyClientBuilder.HostnameVerificationPolicy.ANY)
+         .register(new ClientRequestFilter() {
+            @Override
+            public void filter(ClientRequestContext clientRequestContext) throws IOException {
+               // Remove default RESTeasy http request headers
+               MultivaluedMap<String, Object> clientRequestHeaders = clientRequestContext.getHeaders();
+               clientRequestHeaders.put("Accept-Encoding", Collections.emptyList());
+               // Add custom headers
+               if (httpHeaders != null) {
+                  httpHeaders.forEach(keyValue ->
+                     clientRequestHeaders.put(keyValue.getKey(), Arrays.asList(keyValue.getValue()))
+                  );
+               }
+            }
+         }).build();
 
       if (username != null) {
          BasicAuthentication auth = new BasicAuthentication(username, password);

@@ -109,6 +109,7 @@
       <plugins.coherence-latest/>
       <plugins.process />
       <plugins.resteasy-http />
+      <plugins. />
       <plugins.spark />
       <plugins.spymemcached />
       <plugins.tomcat/>
@@ -547,6 +548,20 @@
          </modules>
          <properties>
             <plugins.resteasy-http>resteasy-http</plugins.resteasy-http>
+         </properties>
+      </profile>
+      <profile>
+         <id>rest-http2</id>
+         <activation>
+            <property>
+               <name>!no-rest-http2</name>
+            </property>
+         </activation>
+         <modules>
+            <module>../plugins/rest-http2</module>
+         </modules>
+         <properties>
+            <plugins.rest-http2>rest-http2</plugins.rest-http2>
          </properties>
       </profile>
       <profile>
