@@ -28,13 +28,13 @@
                <source>11</source>
                <target>11</target>
                <encoding>UTF-8</encoding>
-               <compilerArgs>
-                  <arg>--add-exports</arg>
-                  <arg>--add-modules=java.xml.bind,jdk.incubator.httpclient,java.base</arg>
-                  <arg>java.base/sun.reflect.generics.reflectiveObjects=ALL-UNNAMED</arg>
-                  <arg>--add-exports java.xml.bind,jdk.incubator.httpclient,java.base</arg>
-                  <arg>java.base/jdk.internal.reflect=ALL-UNNAMED</arg>
-               </compilerArgs>
+               <!--<compilerArgs>-->
+                  <!--<arg>&#45;&#45;add-exports</arg>-->
+                  <!--<arg>&#45;&#45;add-modules=java.xml.bind,jdk.incubator.httpclient,java.base</arg>-->
+                  <!--<arg>java.base/sun.reflect.generics.reflectiveObjects=ALL-UNNAMED</arg>-->
+                  <!--<arg>&#45;&#45;add-exports java.xml.bind,jdk.incubator.httpclient,java.base</arg>-->
+                  <!--<arg>java.base/jdk.internal.reflect=ALL-UNNAMED</arg>-->
+               <!--</compilerArgs>-->
             </configuration>
          </plugin>
       </plugins>

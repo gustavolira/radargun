@@ -24,6 +24,8 @@ import org.radargun.utils.KeyValueProperty;
 import org.radargun.utils.RESTAddressListConverter;
 import org.radargun.utils.TimeConverter;
 
+import java.net.http.HttpClient;
+
 /**
  * Abstract REST client service using the JAX-RS 2.0 client api
  *
