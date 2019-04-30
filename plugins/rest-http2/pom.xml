@@ -12,31 +12,40 @@
       <java.version>11</java.version>
       <maven.compiler.source>${java.version}</maven.compiler.source>
       <maven.compiler.target>${java.version}</maven.compiler.target>
-      <argLine>--add-modules java.xml.bind,jdk.incubator.httpclient,java.base</argLine>
-      <additionalRuntimeArgLine>
-         --add-modules=java.xml.bind,jdk.incubator.httpclient,java.base
-      </additionalRuntimeArgLine>
+      <!--<argLine>&#45;&#45;add-modules java.xml.bind,jdk.incubator.httpclient,java.base</argLine>-->
+      <!--<additionalRuntimeArgLine>-->
+         <!--&#45;&#45;add-modules=java.xml.bind,jdk.incubator.httpclient,java.base-->
+      <!--</additionalRuntimeArgLine>-->
    </properties>
 
    <build>
       <plugins>
+
          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-compiler-plugin</artifactId>
             <version>3.8.0</version>
             <configuration>
-               <source>11</source>
-               <target>11</target>
-               <encoding>UTF-8</encoding>
-               <!--<compilerArgs>-->
-                  <!--<arg>&#45;&#45;add-exports</arg>-->
-                  <!--<arg>&#45;&#45;add-modules=java.xml.bind,jdk.incubator.httpclient,java.base</arg>-->
-                  <!--<arg>java.base/sun.reflect.generics.reflectiveObjects=ALL-UNNAMED</arg>-->
-                  <!--<arg>&#45;&#45;add-exports java.xml.bind,jdk.incubator.httpclient,java.base</arg>-->
-                  <!--<arg>java.base/jdk.internal.reflect=ALL-UNNAMED</arg>-->
-               <!--</compilerArgs>-->
+               <release>11</release>
             </configuration>
          </plugin>
+
+         <!--<plugin>-->
+            <!--<groupId>org.apache.maven.plugins</groupId>-->
+            <!--<artifactId>maven-compiler-plugin</artifactId>-->
+            <!--<version>3.8.0</version>-->
+            <!--<configuration>-->
+               <!--<source>11</source>-->
+               <!--<target>11</target>-->
+               <!--<encoding>UTF-8</encoding>-->
+               <!--&lt;!&ndash;<compilerArgs>&ndash;&gt;-->
+                  <!--&lt;!&ndash;<arg>&#45;&#45;add-exports</arg>&ndash;&gt;-->
+                  <!--&lt;!&ndash;<arg>&#45;&#45;add-modules=java.xml.bind,jdk.incubator.httpclient,java.base</arg>&ndash;&gt;-->
+                  <!--&lt;!&ndash;<arg>java.base/sun.reflect.generics.reflectiveObjects=ALL-UNNAMED</arg>&ndash;&gt;-->
+                  <!--&lt;!&ndash;<arg>&#45;&#45;add-exports java.xml.bind,jdk.incubator.httpclient,java.base</arg>&ndash;&gt;-->
+                  <!--&lt;!&ndash;<arg>java.base/jdk.internal.reflect=ALL-UNNAMED</arg>&ndash;&gt;-->
+               <!--&lt;!&ndash;</compilerArgs>&ndash;&gt;-->
+            <!--</configuration>-->
+         <!--</plugin>-->
       </plugins>
    </build>
 
