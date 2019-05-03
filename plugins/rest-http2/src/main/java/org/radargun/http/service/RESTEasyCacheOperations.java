@@ -64,7 +64,10 @@ public class RESTEasyCacheOperations implements BasicOperations {
                         + service.cacheName);
                } else {
                   eTag = response.getEntityTag();
+                  System.out.println("PRINTING ENTITY TAG: "+eTag);
+                  System.out.println("PRINTING ENTITY TAG VALUE: "+eTag.getValue());
                   value = (V) service.decodeByteArray(response.readEntity(byte[].class));
+                  System.out.println("VALUE AFETER DECODE: "+value);
                }
             } catch (Exception e) {
                throw new RuntimeException("RESTEasyCacheOperations::get request threw exception: " + target, e);
@@ -118,6 +121,8 @@ public class RESTEasyCacheOperations implements BasicOperations {
                String target = service.buildUrl(key);
                Builder putBuilder = service.getHttpClient().target(target).request().accept(service.getContentType());
                if (eTag != null) {
+                  System.out.println("IMPRIMINDO ENTITYTAG: "+eTag);
+                  System.out.println("IMPRIMINDO ENTITYTAG VALUE: "+eTag.getValue());
                   // If the eTag doesn't match the current value for the key, then the put will fail
                   putBuilder = putBuilder.header(HttpHeaders.IF_MATCH, eTag.getValue());
                }
@@ -153,6 +158,8 @@ public class RESTEasyCacheOperations implements BasicOperations {
             if (eTag == null) {
                put(key, value);
             } else {
+               System.out.println("imprimindo etag: "+eTag);
+               System.out.println("imprimindo etag value: "+eTag.getValue());
                putInternal(key, value, eTag);
             }
          }

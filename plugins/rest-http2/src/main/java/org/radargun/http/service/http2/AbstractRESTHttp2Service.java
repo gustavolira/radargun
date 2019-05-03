@@ -1,23 +1,7 @@
-package org.radargun.http.service;
+package org.radargun.http.service.http2;
 
-import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.net.http.HttpRequest;
-import java.time.Duration;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-
-import javax.ws.rs.client.ClientRequestContext;
-import javax.ws.rs.client.ClientRequestFilter;
-import javax.ws.rs.core.MultivaluedMap;
-
-import org.jboss.resteasy.client.jaxrs.BasicAuthentication;
-import org.jboss.resteasy.client.jaxrs.ResteasyClient;
-import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
-import org.jboss.resteasy.client.jaxrs.engines.URLConnectionEngine;
 import org.radargun.config.Property;
+import org.radargun.http.service.AbstractRESTEasyService;
 import org.radargun.logging.Log;
 import org.radargun.logging.LogFactory;
 import org.radargun.traits.Lifecycle;
@@ -26,17 +10,24 @@ import org.radargun.utils.KeyValueProperty;
 import org.radargun.utils.RESTAddressListConverter;
 import org.radargun.utils.TimeConverter;
 
+import java.net.*;
 import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.time.Duration;
+import java.util.Base64;
+import java.util.List;
 
 /**
  * Abstract REST client service using the JAX-RS 2.0 client api
  *
  */
-public abstract class AbstractRESTEasyService implements Lifecycle {
+public abstract class AbstractRESTHttp2Service implements Lifecycle {
 
    private static final Log log = LogFactory.getLog(AbstractRESTEasyService.class);
 
-   private ResteasyClient httpClient = null;
+   private HttpClient.Builder httpBuilder = null;
+
+   private HttpRequest.Builder httpRequestBuilder = null;
 
    @Property(doc = "The username to use on an authenticated server. Defaults to null.")
    private String username;
@@ -72,50 +63,48 @@ public abstract class AbstractRESTEasyService implements Lifecycle {
 
    @Override
    public synchronized void start() {
-      if (httpClient != null) {
+      if (httpBuilder != null) {
          log.warn("Service already started");
          return;
       }
 
-      httpClient = new ResteasyClientBuilder().httpEngine(new URLConnectionEngine())
-              .establishConnectionTimeout(connectionTimeout, TimeUnit.MILLISECONDS)
-              .socketTimeout(socketTimeout, TimeUnit.MILLISECONDS).connectionPoolSize(maxConnections)
-              .maxPooledPerRoute(maxConnectionsPerHost).hostnameVerification(ResteasyClientBuilder.HostnameVerificationPolicy.ANY)
-              .register(new ClientRequestFilter() {
-                 @Override
-                 public void filter(ClientRequestContext clientRequestContext) throws IOException {
-                    // Remove default RESTeasy http request headers
-                    MultivaluedMap<String, Object> clientRequestHeaders = clientRequestContext.getHeaders();
-                    clientRequestHeaders.put("Accept-Encoding", Collections.emptyList());
-                    // Add custom headers
-                    if (httpHeaders != null) {
-                       httpHeaders.forEach(keyValue ->
-                               clientRequestHeaders.put(keyValue.getKey(), Arrays.asList(keyValue.getValue()))
-                       );
-                    }
-                 }
-              }).build();
-
-      if (username != null) {
-         BasicAuthentication auth = new BasicAuthentication(username, password);
-         httpClient.register(auth);
+      this.httpRequestBuilder = HttpRequest.newBuilder();
+      this.httpRequestBuilder.header("Accept", this.contentType);
+      if (httpHeaders != null) {
+         httpHeaders.forEach(keyValue ->
+                 this.httpRequestBuilder.header(keyValue.getKey(), keyValue.getValue())
+         );
       }
 
+      this.httpBuilder = HttpClient.newBuilder().connectTimeout(Duration.ofMillis(connectionTimeout));
+
+      if (username != null) {
+         httpBuilder.authenticator(new Authenticator() {
+            @Override
+            protected PasswordAuthentication getPasswordAuthentication() {
+               return new PasswordAuthentication(username, password.toCharArray());
+            }
+         });
+      }
+   }
+
+   private static String basicAuth(String username, String password) {
+      return "Basic " + Base64.getEncoder().encodeToString((username + ":" + password).getBytes());
    }
 
    @Override
    public synchronized void stop() {
-      if (httpClient == null) {
+      if (httpBuilder == null) {
          log.warn("Service not started");
          return;
       }
-      httpClient.close();
-      httpClient = null;
+
+      httpBuilder = null;
    }
 
    @Override
    public synchronized boolean isRunning() {
-      return httpClient != null;
+      return httpBuilder != null;
    }
 
    public String getUsername() {
@@ -150,7 +139,8 @@ public abstract class AbstractRESTEasyService implements Lifecycle {
       return servers;
    }
 
-   public ResteasyClient getHttpClient() {
-      return httpClient;
+   public HttpClient.Builder getHttpClientBuilder() { return httpBuilder;
    }
+
+   public HttpRequest.Builder getHttpRequestBuilder() { return  httpRequestBuilder;}
 }
