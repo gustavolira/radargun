@@ -40,10 +40,11 @@ public class PropertyHelper {
     * Retrieve all properties from this class and all its superclasses.
     *
     * @param clazz
-    * @param useDashedName Convert property names to dashed form - e.g. myPropertyName becomes my-property-name.
+    * @param useDashedName    Convert property names to dashed form - e.g. myPropertyName becomes my-property-name.
     * @param includeDelegates Include also those tagged with {@link PropertyDelegate}.
-    * @param includeAliases Include alternative names of the properties.
-    * @return Map of names of the properties (either dashed or camel cased) to {@link Path paths} in the object graph starting from the given class.
+    * @param includeAliases   Include alternative names of the properties.
+    * @return Map of names of the properties (either dashed or camel cased) to {@link Path paths} in the object graph
+    * starting from the given class.
     */
    public static Map<String, Path> getProperties(Class<?> clazz, boolean useDashedName, boolean includeDelegates, boolean includeAliases) {
       ArrayList<Map.Entry<String, Path>> properties = new ArrayList<>();
@@ -60,8 +61,8 @@ public class PropertyHelper {
     * Retrieve all properties from this class (not including its superclasses).
     *
     * @param clazz
-    * @return Map of names of the properties (either dashed or camel cased) to {@link Path paths}
-    * in the object graph starting from the given class.
+    * @return Map of names of the properties (either dashed or camel cased) to {@link Path paths} in the object graph
+    * starting from the given class.
     */
    public static Collection<Map.Entry<String, Path>> getDeclaredProperties(Class<?> clazz, boolean includeDelegates, boolean includeAliases) {
       ArrayList<Map.Entry<String, Path>> properties = new ArrayList<>();
@@ -72,6 +73,7 @@ public class PropertyHelper {
 
    /**
     * Retrieve string representation of property's value on the source object.
+    *
     * @param path
     * @param source Object where the paths start.
     * @return String representation of the value (as retrieved from its converter).
@@ -143,7 +145,7 @@ public class PropertyHelper {
             }
             // TODO: delegate properties are added according to field type, this does not allow polymorphism
             addProperties(field.getType(), properties, useDashedName,
-               includeDelegates, includeAliases, prefix + delegatePrefix, newPath);
+                  includeDelegates, includeAliases, prefix + delegatePrefix, newPath);
          }
       }
    }
@@ -167,19 +169,19 @@ public class PropertyHelper {
             destPath.set(destination, property.getValue().get(source));
          } catch (IllegalAccessException e) {
             log.errorf(e, "Failed to copy %s (%s) to %s.%s (%s)",
-               property.getValue(), source, destPath, destination);
+                  property.getValue(), source, destPath, destination);
          }
       }
    }
 
    /**
-    * Set properties on the target object using values from the propertyMap.
-    * The keys in propertyMap use property name, values are evaluated and converted here.
+    * Set properties on the target object using values from the propertyMap. The keys in propertyMap use property name,
+    * values are evaluated and converted here.
     *
-    * @param target The modified object.
-    * @param propertyMap Source of the data, not evaluated
+    * @param target                The modified object.
+    * @param propertyMap           Source of the data, not evaluated
     * @param ignoreMissingProperty If the property is not found on the target object, should we throw and exception?
-    * @param useDashedName Expect that the property names in propertyMap use the dashed form.
+    * @param useDashedName         Expect that the property names in propertyMap use the dashed form.
     */
    public static void setProperties(Object target, Map<String, String> propertyMap, boolean ignoreMissingProperty, boolean useDashedName) {
       Class targetClass = target.getClass();
@@ -230,21 +232,45 @@ public class PropertyHelper {
    }
 
    /**
+    * Get @Property annotation and check if systemProperty was set. If systemProperty is set, get the property from
+    * System environment and set on the Service field
+    *
+    * @param target        The modified object.
+    * @param properties    Properties from $target
+    */
+   private static void setEnvProperty(Object target, Map<String, Path> properties) {
+      properties.forEach((key, value) -> {
+         Path path = properties.get(key);
+         Property targetAnnotation = path.getTargetAnnotation();
+         if (targetAnnotation != null && !targetAnnotation.systemProperty().isEmpty()) {
+            String env = System.getenv(targetAnnotation.systemProperty());
+            try {
+               path.set(target, env);
+            } catch (IllegalAccessException e) {
+               e.printStackTrace();
+            }
+         }
+      });
+   }
+
+   /**
     * Set properties on the target object using values from the propertyMap.
     *
-    * @param target The modified object.
-    * @param propertyMap Map of property names to the (possibly complex) definitions.
+    * @param target                The modified object.
+    * @param propertyMap           Map of property names to the (possibly complex) definitions.
     * @param ignoreMissingProperty If the property is not found on the target object, should we throw and exception?
-    * @param useDashedName Expect that the property names in propertyMap use the dashed form.
+    * @param useDashedName         Expect that the property names in propertyMap use the dashed form.
     */
    public static void setPropertiesFromDefinitions(Object target, Map<String, Definition> propertyMap, boolean ignoreMissingProperty, boolean useDashedName) {
       Class targetClass = target.getClass();
       Map<String, Path> properties = getProperties(target.getClass(), useDashedName, true, true);
+      setEnvProperty(target, properties);
 
       for (Map.Entry<String, Definition> entry : propertyMap.entrySet()) {
          String propName = entry.getKey();
 
          Path path = properties.get(propName);
+
          if (path != null) {
             if (!path.isComplete()) {
                try {
@@ -259,6 +285,7 @@ public class PropertyHelper {
                continue;
             }
             Property propertyAnnotation = path.getTargetAnnotation();
+
             if (propertyAnnotation.readonly()) {
                throw new IllegalArgumentException("Property " + propName + " -> " + path + " is readonly and therefore cannot be set!");
             }
@@ -273,11 +300,11 @@ public class PropertyHelper {
                   path.set(target, converter.convert((ComplexDefinition) entry.getValue(), path.getTargetGenericType()));
                } catch (InstantiationException e) {
                   log.errorf(e, "Cannot instantiate converter %s for setting %s (%s)",
-                     converterClass.getName(), path, propName);
+                        converterClass.getName(), path, propName);
                   throw new IllegalArgumentException(e);
                } catch (IllegalAccessException e) {
                   log.errorf(e, "Cannot access converter %s for setting %s (%s)",
-                     converterClass.getName(), path, propName);
+                        converterClass.getName(), path, propName);
                   throw new IllegalArgumentException(e);
                } catch (Throwable t) {
                   log.error("Failed to convert definition " + entry.getValue(), t);
@@ -308,11 +335,11 @@ public class PropertyHelper {
          path.set(target, converter.convert(evaluated, path.getTargetGenericType()));
       } catch (InstantiationException e) {
          log.errorf(e, "Cannot instantiate converter %s for setting %s (%s)",
-            converterClass.getName(), path, propName);
+               converterClass.getName(), path, propName);
          throw new IllegalArgumentException(e);
       } catch (IllegalAccessException e) {
          log.errorf(e, "Cannot access converter %s for setting %s (%s)",
-            converterClass.getName(), path, propName);
+               converterClass.getName(), path, propName);
          throw new IllegalArgumentException(e);
       } catch (Throwable t) {
          log.errorf(t, "Failed to convert value '%s' evaluated to '%s'", propertyString, evaluated);
