@@ -2,15 +2,18 @@ package org.radargun.marshaller;
 
 import org.infinispan.protostream.annotations.ProtoFactory;
 import org.infinispan.protostream.annotations.ProtoField;
+import org.infinispan.protostream.annotations.ProtoDoc;
 
+@ProtoDoc("@Indexed")
 public class Book {
 
+   @ProtoDoc("@Field(index=Index.YES, analyze = Analyze.YES, store = Store.NO)")
    @ProtoField(number = 1)
    final String title;
 
    @ProtoFactory
-   public Book(String text) {
-      this.title = text;
+   public Book(String title) {
+      this.title = title;
    }
 
    public String getTitle() {
