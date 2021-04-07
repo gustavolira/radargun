@@ -22,6 +22,7 @@ Where applicable default value generator can be overriden by placing following e
 |**ByteArrayValueGenerator**	|byte-array		|Generates random byte arrays												|
 |**CacheAwareTextGenerator**	|cache-aware-text	|Generates values containing specified cache name									|
 |**ComposedObjectGenerator**	|composed		|Creates composed values (containing numeric and text values)								|
+|**BookObjectGenerator**    |book           |Generates random Book(title, description, publicationYear, List of Author) values
 |**DateValueGenerator**		|date			|Generates random Date values												|
 |**IntegerValueGenerator**	|integer		|Generates random Integers												|
 |**JpaValueGenerator**		|jpa			|Instantiates JPA entities. The constructor for the entities must match to the generateValue() method			|
